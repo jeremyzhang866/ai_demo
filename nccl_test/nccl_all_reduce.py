@@ -5,7 +5,7 @@ import torch.multiprocessing as mp
 
 
 def setup(rank: int, world_size: int):
-    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_ADDR'] = '127.0.0.1'
     os.environ['MASTER_PORT'] = '12355'
 
     dist.init_process_group(
