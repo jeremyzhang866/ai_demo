@@ -1,0 +1,18 @@
+# Dockerfile.download
+FROM ds-runtime:2.0
+
+# 复制 Kerberos 相关和 HDFS 配置
+COPY ./dolphinscheduler.keytab /data/service/dolphinscheduler.keytab
+COPY ./krb5.conf /etc/krb5.conf
+COPY ./hadoop_conf /etc/hadoop/conf
+
+# 环境变量
+ENV HADOOP_CONF_DIR=/etc/hadoop/conf
+ENV KRB5_CONFIG=/etc/krb5.conf
+
+# 设置工作目录
+WORKDIR /app
+
+# 启动时执行 kinit + 下载参数指定的文件 + sleep
+ENTRYPOINT ["su", "-", "dolphinscheduler", "-c"]
+CMD ["kinit -kt /data/service/dolphinscheduler.keytab dolphinscheduler@INSIGHT.TQCBJ.NIO.COM && echo 📥 Downloading: $0 && hadoop fs -get $0 /app/ && echo ✅ Done && sleep 300"]
