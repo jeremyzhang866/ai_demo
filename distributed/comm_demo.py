@@ -61,17 +61,20 @@ def run(rank, world_size):
     y = x.clone()
     broadcast_tensor(y, src=0)
     info(rank, f"after broadcast → {y}")
+    print("\n")
 
     # 2) all_reduce
     z = x.clone()
     all_reduce_tensor(z)
     info(rank, f"after all_reduce(sum) → {z}")
+    print("\n")
 
     # 3) reduce
     r = x.clone()
     reduce_tensor(r, dst=0)
     if rank == 0:
         info(rank, f"after reduce(sum→0) → {r}")
+    print("\n")
 
     # 4) scatter
     # ------- 修正版本 -------
@@ -85,6 +88,7 @@ def run(rank, world_size):
     out_scat = torch.zeros(1, device=f"cuda:{rank}", dtype=torch.float32)
     dist.scatter(out_scat, scatter_list=scatter_list, src=0)
     info(rank, f"after scatter → {out_scat}")
+    print("\n")
 
     # 5) gather
     send = torch.tensor([rank], device=f"cuda:{rank}")
@@ -95,21 +99,25 @@ def run(rank, world_size):
     gather_tensor(send, gather_list, dst=0)
     if rank == 0:
         info(rank, f"after gather → {gather_list}")
+    print("\n")
 
     # 6) all_gather
     ag = all_gather_tensor(send)
     info(rank, f"after all_gather → {ag}")
+    print("\n")
 
-    # 7) reduce_scatter
-    rs_out = torch.zeros(1, device=f"cuda:{rank}")
-    rs_inp = [torch.tensor([rank+i], device=f"cuda:{rank}") for i in range(world_size)]
-    reduce_scatter_tensor(rs_out, rs_inp)
-    info(rank, f"after reduce_scatter(sum) → {rs_out}")
+    # # 7) reduce_scatter
+    # rs_out = torch.zeros(1, device=f"cuda:{rank}")
+    # rs_inp = [torch.tensor([rank+i], device=f"cuda:{rank}") for i in range(world_size)]
+    # reduce_scatter_tensor(rs_out, rs_inp)
+    # info(rank, f"after reduce_scatter(sum) → {rs_out}")
+    # print("\n")
 
     # 8) barrier
     barrier_wait()
     if rank == 0:
         info(rank, "barrier reached!")
+    print("\n")
 
     dist.destroy_process_group()
 
