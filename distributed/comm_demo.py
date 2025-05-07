@@ -74,12 +74,16 @@ def run(rank, world_size):
         info(rank, f"after reduce(sum→0) → {r}")
 
     # 4) scatter
+    # ------- 修正版本 -------
     if rank == 0:
-        scatter_list = [torch.tensor([i], device=f"cuda:{rank}") for i in range(world_size)]
+        scatter_list = [
+            torch.tensor([i], device=f"cuda:{rank}", dtype=torch.float32)
+            for i in range(world_size)
+        ]
     else:
         scatter_list = None
-    out_scat = torch.zeros(1, device=f"cuda:{rank}")
-    scatter_tensor(out_scat, scatter_list, src=0)
+    out_scat = torch.zeros(1, device=f"cuda:{rank}", dtype=torch.float32)
+    dist.scatter(out_scat, scatter_list=scatter_list, src=0)
     info(rank, f"after scatter → {out_scat}")
 
     # 5) gather
