@@ -1,6 +1,7 @@
 import torch
 import psutil
 import os
+import gc
 
 def print_cpu_memory():
     process = psutil.Process(os.getpid())
@@ -35,12 +36,18 @@ print_gpu_memory()
 # 将张量移动到 GPU
 if torch.cuda.is_available():
     gpu_tensor = cpu_tensor.to("cuda")
+    # 删除原始的 CPU 张量
+    del cpu_tensor
+
+    # 强制进行垃圾回收
+    gc.collect()
     print("\n=== 张量移动到 GPU 后 ===")
     print_cpu_memory()
     print_gpu_memory()
 
+
     # 将张量移回 CPU
-    cpu_tensor = gpu_tensor.to("cpu")
+    cpu_tensor_2 = gpu_tensor.to("cpu")
     print("\n=== 张量移回 CPU 后 ===")
     print_cpu_memory()
     print_gpu_memory()
